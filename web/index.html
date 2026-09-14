@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nira – AI Personal Assistant</title>
+
+<style>
+:root {
+  --bg: #070d18;
+  --primary: #00f5ff;
+  --text: #e5e7eb;
+  --card: rgba(255,255,255,0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* AI GRID BACKGROUND */
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(0,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.06) 1px, transparent 1px),
+    radial-gradient(circle at 20% 20%, #00f5ff15, transparent 40%),
+    radial-gradient(circle at 80% 80%, #2563eb20, transparent 40%);
+  background-size: 40px 40px, 40px 40px, cover, cover;
+}
+
+/* Subtle animated glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #00f5ff10, transparent 60%);
+  animation: pulseGlow 6s infinite ease-in-out;
+  pointer-events: none;
+}
+
+/* HEADER */
+header {
+  backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.6);
+  padding: 18px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0,255,255,0.2);
+  letter-spacing: 1px;
+  color: #00f5ff;
+}
+
+/* CHAT AREA */
+#chat {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 900px;
+  margin: auto;
+  width: 100%;
+}
+
+/* MESSAGE BUBBLES */
+.msg {
+  max-width: 70%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  line-height: 1.5;
+  animation: fadeInUp 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+
+.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #00f5ff, #2563eb);
+  color: black;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 0 15px #00f5ff40;
+}
+
+.bot {
+  align-self: flex-start;
+  background: var(--card);
+  border: 1px solid rgba(0,255,255,0.15);
+  border-bottom-left-radius: 4px;
+}
+
+/* FOOTER */
+footer {
+  backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  padding: 15px;
+  gap: 12px;
+  border-top: 1px solid rgba(0,255,255,0.2);
+}
+
+input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,255,0.2);
+  outline: none;
+  font-size: 16px;
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+button {
+  padding: 14px 22px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #00f5ff, #2563eb);
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px #00f5ff60;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scrollbar */
+#chat::-webkit-scrollbar {
+  width: 6px;
+}
+#chat::-webkit-scrollbar-thumb {
+  background: #00f5ff40;
+  border-radius: 10px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+/* Typing indicator */
+.typing {
+  display: flex;
+  gap: 6px;
+}
+
+.typing span {
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<header>🤖 Nira – AI Personal Assistant</header>
+
+<div id="chat">
+  <div class="msg bot">
+    Hello! I'm Nira. How can I assist you today?
+  </div>
+</div>
+
+<footer>
+  <input id="input" placeholder="Type your message..." />
+  <button onclick="send()">Send</button>
+</footer>
+
+<script src="config.js"></script>
+<script>
+// WEBHOOK_URL comes from config.js (git-ignored).
+// Copy config.example.js -> config.js and paste your own n8n webhook URL.
+const webhookUrl = window.NIRA_CONFIG && window.NIRA_CONFIG.WEBHOOK_URL;
+
+if (!webhookUrl || webhookUrl.indexOf("YOUR-INSTANCE") !== -1) {
+  document.addEventListener("DOMContentLoaded", function () {
+    alert("No webhook configured.\n\nCopy config.example.js to config.js and set your n8n webhook URL.");
+  });
+}
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = `msg ${sender}`;
+  div.innerHTML = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const div = document.createElement("div");
+  div.className = "msg bot typing";
+  div.id = "typing";
+  div.innerHTML = "<span></span><span></span><span></span>";
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const typing = document.getElementById("typing");
+  if (typing) typing.remove();
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+  showTyping();
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await res.json();
+    removeTyping();
+    addMessage(data.output || "No response", "bot");
+  } catch (err) {
+    removeTyping();
+    addMessage("⚠ Unable to connect to server.", "bot");
+  }
+}
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") send();
+});
+</script>
+
+</body>
+</html>

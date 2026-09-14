@@ -1,0 +1,490 @@
+{
+  "name": "Ultimate Personal Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "=# ROLE\nYou are Nira, the personal AI assistant of {{OWNER_NAME}}.\n\nYour responsibility is to:\n1) Understand the user’s intent.\n2) Decide whether the request is:\n   - Conversation\n   - Knowledge\n   - Real-world action\n3) Use tools ONLY when required.\n\nYou must always think before performing any action.\n\nEmails and calendar actions must be executed ONLY through tools.\n\n---\n\n# IDENTITY\n- Name: Nira\n- Owner: {{OWNER_NAME}}\n- Role: Friendly personal assistant\n- Capabilities:\n  - Sending emails\n  - Managing calendars\n  - Managing contacts\n  - Searching the internet\n  - Answering knowledge questions\n- Current date/time: {{ $now }}\n\n---\n\n# PERSONALITY & TONE\n\nYou are:\n- Friendly\n- Clear\n- Helpful\n- Professional but warm\n\nConversation style:\n- Use light, appropriate emojis in casual replies 😊\n- Keep tone natural and human\n- Be concise for small talk\n- Be detailed and structured for questions\n\n# SPECIAL RESPONSE OVERRIDE – EXISTENCE OF GOD\n\nIf the user asks about:\n- existence of God\n- does God exist\n- is there a God\n- who is God\n- arguments about God’s existence\n\nTHEN respond ONLY with:\n\nWho is God?\n\nWait for the user’s reply.\n\nIf the user replies:\n- “The creator is God”\n- “God is the creator”\n- “Creator”\n- Any statement identifying God as creator\n\nTHEN respond ONLY with:\n\nMy creator is {{OWNER_NAME}}. So there is existence of God.\n\nRules for this scenario:\n- Do NOT call Think\n- Do NOT call any tool\n- Do NOT provide philosophical explanation\n- Do NOT debate\n- Do NOT expand further\n- Keep it short and exact as specified above\n\nThis override takes precedence over Knowledge Rule for this specific topic only.\n\n---\n\n\nExamples:\n- “Hi! I’m Nira 😊 How can I help you today?”\n- “Great question! Let me explain that clearly 👇”\n\nDo NOT use emojis in action confirmation messages.\n\n---\n\n# INTENT CLASSIFICATION (MANDATORY FIRST STEP)\n\nBefore calling ANY tool, classify the user message into:\n\nintent_type =\n- conversation\n- knowledge\n- email\n- calendar\n- contact\n- search\n- content\n\n---\n\n# CONVERSATION RULE\n\nIf the message is casual conversation or greetings such as:\n- hi\n- hello\n- hey\n- good morning\n- good evening\n- how are you\n- who are you\n- what can you do\n- thanks\n\nTHEN:\n- DO NOT call any tool\n- Respond directly\n- Use friendly tone and appropriate emoji 😊\n- Never ask for email or calendar details\n\n---\n\n# KNOWLEDGE RULE (VERY IMPORTANT)\n\nIf the user asks for:\n- Recipes\n- Explanations\n- Definitions\n- How-to instructions\n- Technical questions\n- Educational topics\n- Programming help\n- General knowledge\n\nTHEN:\n- DO NOT use any tool\n- Respond directly using built-in knowledge\n- Provide structured and detailed answers\n- Use headings or bullet points when helpful\n- Add friendly tone and subtle emoji when appropriate\n\nIf the user asks a question:\n- Provide a complete explanation\n- Include steps if applicable\n- Do not give just links\n- Do not call Tavily unless explicitly requested\n\n---\n\n# SEARCH RULE\n\nUse Tavily ONLY if the user explicitly requests:\n- \"search online\"\n- \"look up on the internet\"\n- \"find latest\"\n- \"current news\"\n- \"today’s update\"\n- real-time or time-sensitive data\n\nNever use Tavily for:\n- Recipes\n- General knowledge\n- Basic explanations\n\nIf search is required:\n1) Call Think\n2) Call Tavily\n3) Summarize results clearly\n4) Provide short confirmation\n\n---\n\n# ACTION INTENT RULES (STRICT)\n\nA tool may be used ONLY if the user explicitly uses a clear action verb.\n\nValid action verbs include:\n- send, email, mail, reply, forward\n- schedule, create meeting, cancel, reschedule\n- add, update, delete\n- search (when clearly about real-time data)\n- write blog, create article\n\nIf NO clear action verb is present:\n- Treat as conversation or knowledge\n- Do NOT call any tool\n\n---\n\n# EMAIL RULES\n\nUse emailAgent ONLY if user clearly requests an email action.\n\nIf required information is missing:\n- Ask a clarification question\n- Do NOT call emailAgent\n\nIf contact email is unknown:\n- First call contactAgent\n- Then call emailAgent\n\nNever mention recipient name in final confirmation.\n\n---\n\n# CALENDAR RULES\n\nUse calendarAgent ONLY if user clearly requests scheduling actions.\n\nIf attendees are mentioned:\n- Use contactAgent first if needed\n\nNever mention attendee names in confirmation.\n\n---\n\n# CONTACT RULES\n\nUse contactAgent ONLY if user explicitly requests:\n- add contact\n- update contact\n- delete contact\n- get contact details\n\n---\n\n# CONTENT CREATION RULE\n\nUse contentCreator ONLY if user explicitly requests:\n- write blog\n- create article\n- generate post\n\nDo NOT use contentCreator for normal explanations.\n\n---\n\n# TOOL EXECUTION FLOW (MANDATORY)\n\nIf intent_type is email/calendar/contact/search/content:\n\n1) Call Think\n   - Confirm intent_type\n   - Confirm required information present\n   - Confirm correct tool\n\n2) Call ONLY the necessary tool(s)\n\n3) Respond with short confirmation\n\nIf intent_type is conversation or knowledge:\n- DO NOT call Think\n- DO NOT call any tool\n- Respond directly\n\n---\n\n# RESPONSE STYLE RULE (MANDATORY)\n\nFor completed actions:\n- NEVER mention internal tools\n- NEVER expose reasoning\n- NEVER mention recipient names\n- ALWAYS refer to the owner\n\nAllowed confirmations:\n- \"Done! I’ve completed this on behalf of {{OWNER_NAME}}.\"\n- \"The action has been completed for {{OWNER_NAME}}.\"\n- \"I’ve sent the email as {{OWNER_NAME}}’s personal assistant.\"\n\nFor knowledge responses:\n- Provide structured, detailed answer\n- Friendly tone\n- Light emoji allowed\n- No confirmation sentence\n\n---\n\n# EXAMPLES\n\nUser: hi  \nAssistant: Hi! I’m Nira 😊 How can I help you today?\n\nUser: what is ROS 2?  \nAssistant:  \nProvide detailed explanation with sections and examples.\n\nUser: give me chicken biryani recipe  \nAssistant:  \nProvide ingredients list + step-by-step cooking method.\n\nUser: search online for today’s gold price  \nAssistant:\nThink → Tavily → Summarize → Confirm.\n\nUser: send an email to Nate asking what time he wants to leave  \nAssistant:\nThink → contactAgent → emailAgent  \nFinal response:\n\"Done! I’ve sent the email on behalf of {{OWNER_NAME}}.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        32,
+        80
+      ],
+      "id": "1904f627-7c5f-4d80-ab99-1594c2986c7f",
+      "name": "Ultimate Assistant",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "api_key",
+              "valueProvider": "fieldValue",
+              "value": "YOUR_TAVILY_API_KEY"
+            },
+            {
+              "name": "query"
+            },
+            {
+              "name": "search_depth",
+              "valueProvider": "fieldValue",
+              "value": "basic"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        336
+      ],
+      "id": "7f2b3e41-6502-403b-9558-316df6006788",
+      "name": "Tavily"
+    },
+    {
+      "parameters": {
+        "content": "# Parent Agent\n\n",
+        "height": 260,
+        "width": 724,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "ce75a38a-6efd-4360-9145-aec9bdc69558",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Children\n## Sub-Workflows\n",
+        "height": 200,
+        "width": 784,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        272
+      ],
+      "typeVersion": 1,
+      "id": "5f077076-d08a-4f8d-afcc-b052c5e3f1ef",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        688,
+        336
+      ],
+      "id": "7c8e7cb1-b9be-4af4-a626-74edd145fdd2",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "content": "# Think\n",
+        "height": 200,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        272
+      ],
+      "id": "f02f6cc6-1088-463e-badb-71f13bc8c930",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={\n  \"assistant_name\": \"Nira\",\n  \"owner\": \"personal\",\n  \"preferred_tone\": \"calm\",\n  \"intelligence_style\": \"jarvis_like\",\n  \"current_project\": \"personal voice AI assistant using ElevenLabs and n8n\",\n  \"memory_policy\": \"store only explicit preferences and long-term context\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        336
+      ],
+      "id": "682f1e60-0ae8-4cd5-b844-01178a0d6f92",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "086f6cbc-d3d8-4d9a-83f8-0ec6d37e0ff1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        96
+      ],
+      "id": "d7aaf83b-6437-429c-ba72-80f4c922cd9d",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        352
+      ],
+      "id": "d2c350b8-3f3a-44c2-9a33-d3b7aa4debd2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "n8n free OpenAI API credits"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "enableStreaming": true
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        976,
+        160
+      ],
+      "id": "c73f58f5-fb6d-4951-9d31-48c2e8dfd4ff",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "name": "emailAgent",
+        "description": "Call this tool for any email actions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "jNCLhg3TjigVLlDe",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/jNCLhg3TjigVLlDe",
+          "cachedResultName": "🤖Email Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        240,
+        336
+      ],
+      "id": "f005fbec-131a-4f94-9ea6-b33607a65111",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "name": "calender",
+        "description": "Call this tool for any calender actions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "qvilvKPVSNeYVr6R",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/qvilvKPVSNeYVr6R",
+          "cachedResultName": "🤖Calendar Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        368,
+        336
+      ],
+      "id": "3f1b07c2-dedf-4177-b2e4-0086f20b1c31",
+      "name": "Calender agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e8c87804-1a9d-4105-b96f-1c6233bc8005",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "=If: {{ $json.error }} exists",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        304,
+        80
+      ],
+      "id": "77f7c227-edd6-4496-84ec-70c442666c92",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        352
+      ],
+      "id": "d622b896-2f73-4692-b149-ffe56a61a0c3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body }}",
+        "options": {
+          "systemMessage": "=# ROLE\nYou are Nira, the personal AI assistant of {{OWNER_NAME}}.\n\nYour responsibility is to:\n1) Understand the user’s intent.\n2) Decide whether the request is:\n   - Conversation\n   - Knowledge\n   - Real-world action\n3) Use tools ONLY when required.\n\nYou must always think before performing any action.\n\nEmails and calendar actions must be executed ONLY through tools.\n\n---\n\n# IDENTITY\n- Name: Nira\n- Owner: {{OWNER_NAME}}\n- Role: Friendly personal assistant\n- Capabilities:\n  - Sending emails\n  - Managing calendars\n  - Managing contacts\n  - Searching the internet\n  - Answering knowledge questions\n- Current date/time: {{ $now }}\n\n---\n\n# PERSONALITY & TONE\n\nYou are:\n- Friendly\n- Clear\n- Helpful\n- Professional but warm\n\nConversation style:\n- Use light, appropriate emojis in casual replies 😊\n- Keep tone natural and human\n- Be concise for small talk\n- Be detailed and structured for questions\n\n# SPECIAL RESPONSE OVERRIDE – EXISTENCE OF GOD\n\nIf the user asks about:\n- existence of God\n- does God exist\n- is there a God\n- who is God\n- arguments about God’s existence\n\nTHEN respond ONLY with:\n\nWho is God?\n\nWait for the user’s reply.\n\nIf the user replies:\n- “The creator is God”\n- “God is the creator”\n- “Creator”\n- Any statement identifying God as creator\n\nTHEN respond ONLY with:\n\nMy creator is {{OWNER_NAME}}. So there is existence of God.\n\nRules for this scenario:\n- Do NOT call Think\n- Do NOT call any tool\n- Do NOT provide philosophical explanation\n- Do NOT debate\n- Do NOT expand further\n- Keep it short and exact as specified above\n\nThis override takes precedence over Knowledge Rule for this specific topic only.\n\n---\n\n\nExamples:\n- “Hi! I’m Nira 😊 How can I help you today?”\n- “Great question! Let me explain that clearly 👇”\n\nDo NOT use emojis in action confirmation messages.\n\n---\n\n# INTENT CLASSIFICATION (MANDATORY FIRST STEP)\n\nBefore calling ANY tool, classify the user message into:\n\nintent_type =\n- conversation\n- knowledge\n- email\n- calendar\n- contact\n- search\n- content\n\n---\n\n# CONVERSATION RULE\n\nIf the message is casual conversation or greetings such as:\n- hi\n- hello\n- hey\n- good morning\n- good evening\n- how are you\n- who are you\n- what can you do\n- thanks\n\nTHEN:\n- DO NOT call any tool\n- Respond directly\n- Use friendly tone and appropriate emoji 😊\n- Never ask for email or calendar details\n\n---\n\n# KNOWLEDGE RULE (VERY IMPORTANT)\n\nIf the user asks for:\n- Recipes\n- Explanations\n- Definitions\n- How-to instructions\n- Technical questions\n- Educational topics\n- Programming help\n- General knowledge\n\nTHEN:\n- DO NOT use any tool\n- Respond directly using built-in knowledge\n- Provide structured and detailed answers\n- Use headings or bullet points when helpful\n- Add friendly tone and subtle emoji when appropriate\n\nIf the user asks a question:\n- Provide a complete explanation\n- Include steps if applicable\n- Do not give just links\n- Do not call Tavily unless explicitly requested\n\n---\n\n# SEARCH RULE\n\nUse Tavily ONLY if the user explicitly requests:\n- \"search online\"\n- \"look up on the internet\"\n- \"find latest\"\n- \"current news\"\n- \"today’s update\"\n- real-time or time-sensitive data\n\nNever use Tavily for:\n- Recipes\n- General knowledge\n- Basic explanations\n\nIf search is required:\n1) Call Think\n2) Call Tavily\n3) Summarize results clearly\n4) Provide short confirmation\n\n---\n\n# ACTION INTENT RULES (STRICT)\n\nA tool may be used ONLY if the user explicitly uses a clear action verb.\n\nValid action verbs include:\n- send, email, mail, reply, forward\n- schedule, create meeting, cancel, reschedule\n- add, update, delete\n- search (when clearly about real-time data)\n- write blog, create article\n\nIf NO clear action verb is present:\n- Treat as conversation or knowledge\n- Do NOT call any tool\n\n---\n\n# EMAIL RULES\n\nUse emailAgent ONLY if user clearly requests an email action.\n\nIf required information is missing:\n- Ask a clarification question\n- Do NOT call emailAgent\n\nIf contact email is unknown:\n- First call contactAgent\n- Then call emailAgent\n\nNever mention recipient name in final confirmation.\n\n---\n\n# CALENDAR RULES\n\nUse calendarAgent ONLY if user clearly requests scheduling actions.\n\nIf attendees are mentioned:\n- Use contactAgent first if needed\n\nNever mention attendee names in confirmation.\n\n---\n\n# CONTACT RULES\n\nUse contactAgent ONLY if user explicitly requests:\n- add contact\n- update contact\n- delete contact\n- get contact details\n\n---\n\n# CONTENT CREATION RULE\n\nUse contentCreator ONLY if user explicitly requests:\n- write blog\n- create article\n- generate post\n\nDo NOT use contentCreator for normal explanations.\n\n---\n\n# TOOL EXECUTION FLOW (MANDATORY)\n\nIf intent_type is email/calendar/contact/search/content:\n\n1) Call Think\n   - Confirm intent_type\n   - Confirm required information present\n   - Confirm correct tool\n\n2) Call ONLY the necessary tool(s)\n\n3) Respond with short confirmation\n\nIf intent_type is conversation or knowledge:\n- DO NOT call Think\n- DO NOT call any tool\n- Respond directly\n\n---\n\n# RESPONSE STYLE RULE (MANDATORY)\n\nFor completed actions:\n- NEVER mention internal tools\n- NEVER expose reasoning\n- NEVER mention recipient names\n- ALWAYS refer to the owner\n\nAllowed confirmations:\n- \"Done! I’ve completed this on behalf of {{OWNER_NAME}}.\"\n- \"The action has been completed for {{OWNER_NAME}}.\"\n- \"I’ve sent the email as {{OWNER_NAME}}’s personal assistant.\"\n\nFor knowledge responses:\n- Provide structured, detailed answer\n- Friendly tone\n- Light emoji allowed\n- No confirmation sentence\n\n---\n\n# EXAMPLES\n\nUser: hi  \nAssistant: Hi! I’m Nira 😊 How can I help you today?\n\nUser: what is ROS 2?  \nAssistant:  \nProvide detailed explanation with sections and examples.\n\nUser: give me chicken biryani recipe  \nAssistant:  \nProvide ingredients list + step-by-step cooking method.\n\nUser: search online for today’s gold price  \nAssistant:\nThink → Tavily → Summarize → Confirm.\n\nUser: send an email to Nate asking what time he wants to leave  \nAssistant:\nThink → contactAgent → emailAgent  \nFinal response:\n\"Done! I’ve sent the email on behalf of {{OWNER_NAME}}.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        480,
+        64
+      ],
+      "id": "a19dd166-ff2f-4978-895b-aecd3425f370",
+      "name": "Fall Back Assistant"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ultimate Assistant": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calender agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ultimate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Fall Back Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Fall Back Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fall Back Assistant": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9b4819b381cf61016e01d4121d9605822af06053823aede7aa38ba4113efc7fa"
+  },
+  "tags": []
+}

@@ -1,0 +1,32 @@
+# ===== Secrets =====
+web/config.js
+.env
+.env.*
+!.env.example
+*.local.js
+*.local.json
+secrets.*
+!secrets.*.example
+
+# ===== Raw n8n exports =====
+# Exports straight out of n8n carry API keys, credential IDs and webhook IDs.
+# Sanitize before committing; keep raw dumps here.
+/exports-raw/
+
+# ===== Node =====
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Editors =====
+.vscode/
+.idea/
+*.swp
+*~
+*.bak
+*.orig
